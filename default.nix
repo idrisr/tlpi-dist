@@ -6,17 +6,16 @@ stdenv.mkDerivation rec {
     sha256 = "sha256:123fjajph22s02xlfxvb5y2z7w776sx7vkcb3hyfggry6l3zpldf";
   };
   patches = [ ./Makefile.patch ];
-  flags = [
+  flags = lib.strings.concatStringsSep " " [
     "--directory=lib"
     "TLPI_DIR=${src}"
     "TLPI_LIB=./libtlpi.a"
     "TLPI_INSTALL=$out"
   ];
-  sFlags = lib.strings.concatStringsSep " " flags;
 
-  buildPhase = "make ${sFlags}";
+  buildPhase = "make ${flags}";
   buildInputs = [ libcap ];
   installPhase = ''
     mkdir -p $out/lib $out/include;
-    make install ${sFlags}'';
+    make install ${flags}'';
 }
