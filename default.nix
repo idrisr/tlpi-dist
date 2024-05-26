@@ -1,4 +1,4 @@
-{ stdenv, libcap }:
+{ stdenv, libcap, lib }:
 stdenv.mkDerivation rec {
   name = "libtlpi";
   src = fetchTarball {
@@ -6,12 +6,17 @@ stdenv.mkDerivation rec {
     sha256 = "sha256:123fjajph22s02xlfxvb5y2z7w776sx7vkcb3hyfggry6l3zpldf";
   };
   patches = [ ./Makefile.patch ];
+  flags = [
+    "--directory=lib"
+    "TLPI_DIR=${src}"
+    "TLPI_LIB=./libtlpi.a"
+    "TLPI_INSTALL=$out"
+  ];
+  sFlags = lib.strings.concatStringsSep " " flags;
 
-  buildPhase = ''
-    make --directory=lib "TLPI_DIR=${src}" "TLPI_LIB=./libtlpi.a" "TLPI_INSTALL=$out"'';
+  buildPhase = "make ${sFlags}";
   buildInputs = [ libcap ];
   installPhase = ''
-    mkdir -p $out/lib
-    mkdir -p $out/include
-    make install --directory=lib "TLPI_DIR=${src}" "TLPI_LIB=./libtlpi.a" "TLPI_INSTALL=$out"'';
+    mkdir -p $out/lib $out/include;
+    make install ${sFlags}'';
 }
